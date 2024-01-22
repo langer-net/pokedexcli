@@ -32,24 +32,3 @@ func startRepl() {
 		}
 	}
 }
-
-type cliCommand struct {
-	name        string
-	description string
-	callback    func() error
-}
-
-func getCliCommands() map[string]cliCommand {
-	var cliCommands = make(map[string]cliCommand)
-	cliCommands["help"] = cliCommand{
-		name:        "help",
-		description: "Displays this help message",
-		callback:    commandHelp,
-	}
-	cliCommands["exit"] = cliCommand{
-		name:        "exit",
-		description: "Exits the Pokedex",
-		callback:    commandExit,
-	}
-	return cliCommands
-}
