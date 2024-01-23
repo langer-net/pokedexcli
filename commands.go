@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/langer-net/pokedexcli/internal/poke_api"
 	"os"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*config) error
 }
 
 func getCliCommands() map[string]cliCommand {
@@ -27,12 +26,17 @@ func getCliCommands() map[string]cliCommand {
 	cliCommands["map"] = cliCommand{
 		name:        "map",
 		description: "Displays the names of the next 20 location areas in the world of Pokemon.",
-		callback:    commandMap,
+		callback:    commandMapForwards,
+	}
+	cliCommands["mapb"] = cliCommand{
+		name:        "mapb",
+		description: "Displays the names of the previous 20 location areas in the world of Pokemon.",
+		callback:    commandMapBackwards,
 	}
 	return cliCommands
 }
 
-func commandHelp() error {
+func commandHelp(cfg *config) error {
 	fmt.Println()
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage: ")
@@ -45,16 +49,40 @@ func commandHelp() error {
 	return nil
 }
 
-func commandExit() error {
+func commandExit(cfg *config) error {
 	fmt.Println("Exiting the Pokedex ...")
 	os.Exit(0)
 	return nil
 }
 
-func commandMap() error {
-	err := poke_api.ProcessLocationAreaRequest()
+func commandMapForwards(cfg *config) error {
+	locationAreaRequest, err := cfg.pokeapiClient.ListLocations(cfg.nextLocationsURL)
 	if err != nil {
 		return err
 	}
+
+	cfg.nextLocationsURL = locationAreaRequest.Next
+	cfg.previousLocationsURL = locationAreaRequest.Previous
+
+	for _, location := range locationAreaRequest.Results {
+		fmt.Println(location.Name)
+	}
+
+	return nil
+}
+
+func commandMapBackwards(cfg *config) error {
+	locationAreaRequest, err := cfg.pokeapiClient.ListLocations(cfg.previousLocationsURL)
+	if err != nil {
+		return err
+	}
+
+	cfg.nextLocationsURL = locationAreaRequest.Next
+	cfg.previousLocationsURL = locationAreaRequest.Previous
+
+	for _, location := range locationAreaRequest.Results {
+		fmt.Println(location.Name)
+	}
+
 	return nil
 }

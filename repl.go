@@ -3,10 +3,17 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/langer-net/pokedexcli/internal/pokeapi"
 	"os"
 )
 
-func startRepl() {
+type config struct {
+	pokeapiClient        pokeapi.Client
+	nextLocationsURL     *string
+	previousLocationsURL *string
+}
+
+func startRepl(cfg *config) {
 	cliCommands := getCliCommands()
 	cliReader := bufio.NewScanner(os.Stdin)
 
@@ -25,7 +32,7 @@ func startRepl() {
 			fmt.Println("Use help to get a list of all commands.")
 			continue
 		}
-		err = command.callback()
+		err = command.callback(cfg)
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue
