@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type LocationAreas struct {
+type locationAreas struct {
 	Name string `json:"name"`
 	Url  string `json:"url"`
 }
@@ -15,7 +15,7 @@ type LocationAreaRequest struct {
 	Count    int             `json:"count"`
 	Next     *string         `json:"next"`
 	Previous *string         `json:"previous"`
-	Results  []LocationAreas `json:"results"`
+	Results  []locationAreas `json:"results"`
 }
 
 func (c *Client) ListLocations(pageURL *string) (LocationAreaRequest, error) {
@@ -24,6 +24,14 @@ func (c *Client) ListLocations(pageURL *string) (LocationAreaRequest, error) {
 	url := baseURL + "location-area/"
 	if pageURL != nil {
 		url = *pageURL
+	}
+
+	if val, ok := c.cache.Get(url); ok {
+		err := json.Unmarshal(val, &locationAreaRequest)
+		if err != nil {
+			return locationAreaRequest, err
+		}
+		return locationAreaRequest, nil
 	}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -46,6 +54,8 @@ func (c *Client) ListLocations(pageURL *string) (LocationAreaRequest, error) {
 	if err != nil {
 		return locationAreaRequest, err
 	}
+
+	c.cache.Add(url, data)
 
 	return locationAreaRequest, nil
 }
