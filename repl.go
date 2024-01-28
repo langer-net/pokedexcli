@@ -11,6 +11,7 @@ type config struct {
 	pokeapiClient        pokeapi.Client
 	nextLocationsURL     *string
 	previousLocationsURL *string
+	caughtPokemon        map[string]pokeapi.PokemonResponse
 }
 
 func startRepl(cfg *config) {
@@ -18,21 +19,27 @@ func startRepl(cfg *config) {
 	cliReader := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print("pokedex > ")
+		fmt.Print("Pokedex > ")
 		cliReader.Scan()
-		input, err := cleanInput(cliReader.Text())
-		if err != nil {
-			fmt.Println("Error: ", err)
+
+		words := cleanInput(cliReader.Text())
+		if len(words) == 0 {
+			fmt.Println("Error: no input was given")
 			continue
 		}
+		commandName := words[0]
+		var args []string
+		if len(words) > 1 {
+			args = words[1:]
+		}
 
-		command, exists := cliCommands[input]
+		command, exists := cliCommands[commandName]
 		if !exists {
-			fmt.Println("Error: ", input, " is not a command")
+			fmt.Println("Error: ", commandName, " is not a command")
 			fmt.Println("Use help to get a list of all commands.")
 			continue
 		}
-		err = command.callback(cfg)
+		err := command.callback(cfg, args...)
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue

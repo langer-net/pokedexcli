@@ -11,15 +11,15 @@ type locationAreas struct {
 	Url  string `json:"url"`
 }
 
-type LocationAreaRequest struct {
+type LocationAreaResponse struct {
 	Count    int             `json:"count"`
 	Next     *string         `json:"next"`
 	Previous *string         `json:"previous"`
 	Results  []locationAreas `json:"results"`
 }
 
-func (c *Client) ListLocations(pageURL *string) (LocationAreaRequest, error) {
-	locationAreaRequest := LocationAreaRequest{}
+func (c *Client) ListLocations(pageURL *string) (LocationAreaResponse, error) {
+	locationAreaResponse := LocationAreaResponse{}
 
 	url := baseURL + "location-area/"
 	if pageURL != nil {
@@ -27,35 +27,35 @@ func (c *Client) ListLocations(pageURL *string) (LocationAreaRequest, error) {
 	}
 
 	if val, ok := c.cache.Get(url); ok {
-		err := json.Unmarshal(val, &locationAreaRequest)
+		err := json.Unmarshal(val, &locationAreaResponse)
 		if err != nil {
-			return locationAreaRequest, err
+			return locationAreaResponse, err
 		}
-		return locationAreaRequest, nil
+		return locationAreaResponse, nil
 	}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return locationAreaRequest, err
+		return locationAreaResponse, err
 	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return locationAreaRequest, err
+		return locationAreaResponse, err
 	}
 	defer resp.Body.Close()
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return locationAreaRequest, err
+		return locationAreaResponse, err
 	}
 
-	err = json.Unmarshal(data, &locationAreaRequest)
+	err = json.Unmarshal(data, &locationAreaResponse)
 	if err != nil {
-		return locationAreaRequest, err
+		return locationAreaResponse, err
 	}
 
 	c.cache.Add(url, data)
 
-	return locationAreaRequest, nil
+	return locationAreaResponse, nil
 }
