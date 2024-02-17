@@ -40,6 +40,11 @@ func getCliCommands() map[string]cliCommand {
 		description: "Attempts to catch the given pokemon.",
 		callback:    commandCatch,
 	}
+	cliCommands["inspect"] = cliCommand{
+		name:        "inspect <pokemon_name>",
+		description: "Inspects the given pokemon if already caught.",
+		callback:    commandInspect,
+	}
 	cliCommands["exit"] = cliCommand{
 		name:        "exit",
 		description: "Exits the Pokedex.",
@@ -135,6 +140,32 @@ func commandCatch(cfg *config, args ...string) error {
 	fmt.Printf("%s was caught! \r\n", pokemon.Name)
 
 	cfg.caughtPokemon[pokemon.Name] = pokemon
+
+	return nil
+}
+
+func commandInspect(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("you must provide a pokemon name")
+	}
+
+	name := args[0]
+	pokemon, ok := cfg.caughtPokemon[name]
+	if !ok {
+		return errors.New("you have not caught this pokemon")
+	}
+
+	fmt.Printf("Name: %s \r\n", pokemon.Name)
+	fmt.Printf("Height: %d \r\n", pokemon.Height)
+	fmt.Printf("Weight: %d \r\n", pokemon.Weight)
+	fmt.Printf("Stats: \r\n")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf("\t%s: %d \r\n", stat.Stat.Name, stat.BaseStat)
+	}
+	fmt.Printf("Types: \r\n")
+	for _, typeInfo := range pokemon.Types {
+		fmt.Printf("\t%s \r\n", typeInfo.Type.Name)
+	}
 
 	return nil
 }
