@@ -15,12 +15,12 @@ cd pokedexcli
 go build
 ```
 
-To then run it:
+## Usage
+
+To run the project use:
 ```BASH
 ./pokedexcli
 ```
-
-## Usage
 
 The CLI gives you the ability to view all the different maps of all the Pokemon games. You can use `map` to retrieve the 
 next 20 cards from the API or cache and `mapb` to get the previous 20 cards. To see all Pokemon on a particular map, you 
